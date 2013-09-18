@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Class::Accessor::Lite ( new => 1, ro => [qw( dbh )] );
 use Teng;
+use POSIX qw();
 
 our $VERSION = "0.01";
 
@@ -51,34 +52,38 @@ sub build {
                 $row->{$col} = $args{$col};
             }
         } else {
-            $row->{$col} = $col->($self);
+            $row->{$col} = $rule->{$col}->($self);
         }
     }
     return $row;
 }
 
 sub sequence {
-    my ($self, $name) = @_;
+    my ($self, $namespace) = @_;
     $self->{__sequence} ||= {};
-    $self->{__sequence}->{$name} ||= 0;
-    $self->{__sequence}->{$name}++;
-    return $self->{__sequence}->{$name};
+    $self->{__sequence}->{$namespace} ||= 0;
+    $self->{__sequence}->{$namespace}++;
+    return $self->{__sequence}->{$namespace};
 }
 
 sub string {
     my ($self, $max, $min) = @_;
+    $min ||= 0;
+    my $count = $min + POSIX::floor(rand() * ($max - $min));
+    my @alpha = qw(a b c d e f g h i j k l m n o p q r s t u v x y z 1 2 3 4 5 6 7 8 9 0 _ );
+    my $result = "";
+    for my $loop (1..$count) {
+        my $index = POSIX::floor(rand() * scalar @alpha);
+        my $choice = $alpha[$index];
+        $result .= $choice;
+    }
+    return $result;
 }
 
 sub uint {
     my ($self, $max, $min) = @_;
-}
-
-sub date {
-    my ($self, ) = @_;
-}
-
-sub datetime {
-    my ($self, ) = @_;
+    $min ||= 0;
+    return $min + POSIX::floor(rand() * ($max - $min));
 }
 
 1;
@@ -102,8 +107,8 @@ DBIx::RecordFactory - It's new $module
         }
     });
     $factory->define('account' => {
-        login_id => sub { shift->string() }
-        password => sub { shift->string() }
+        login_id => sub { shift->string(255) }
+        password => sub { shift->string(255) }
     });
 
     my $userdata = $factory->insert('user');
