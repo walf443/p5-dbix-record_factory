@@ -42,7 +42,9 @@ sub insert {
 
 sub build {
     my ($self, $rule_name, %args) = @_;
-    my $rule = $self->rule($rule_name);
+    my $rule = $self->rule($rule_name)
+        or die "Can't find rule: $rule_name";
+
     my $row = {};
     for my $col ( keys %$rule ) {
         if ( $args{$col} ) {
@@ -102,7 +104,7 @@ DBIx::RecordFactory - It's new $module
     $factory->define('user' => +{
         id => sub { shift->sequence('account_id') }
         account_id => sub {
-            my $account = shift->create('account');
+            my $account = shift->insert('account');
             $account->{id};
         }
     });
@@ -117,7 +119,7 @@ DBIx::RecordFactory - It's new $module
     #     'account_id' => 1,
     #   }
     my $teng = Teng->new(dbh => $dbh);
-    my $account = $teng->lookup($userdata->{account_id});
+    my $account = $teng->lookup(account => { id => $userdata->{account_id} });
 
 =head1 DESCRIPTION
 
