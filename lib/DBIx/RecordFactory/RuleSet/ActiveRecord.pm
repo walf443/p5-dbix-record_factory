@@ -61,7 +61,6 @@ This document describes DBIx::RecordFactory::RuleSet::ActiveRecord version 0.01.
 
     use DBIx::RecordFactory::RuleSet::ActiveRecord;
     my $factory = DBIx::RecordFactory->new(dbh => $dbh);
-    $factory->apply_rule("ActiveRecord");
     DBIx::RecordFactory::RuleSet::ActiveRecord->apply(factory => $factory);
     $factory->redefine(xxx => { yyy_id => sub { my $r = $_[0]->insert('yyy'); $r->{id} } });
 

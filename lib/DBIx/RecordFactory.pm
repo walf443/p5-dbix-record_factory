@@ -144,8 +144,7 @@ DBIx::RecordFactory - It's new $module
     #     'id' => 1,
     #     'account_id' => 1,
     #   }
-    my $teng = Teng->new(dbh => $dbh);
-    my $account = $teng->single(account => { id => $userdata->{account_id} });
+    my $account = $factory->teng->single(account => { id => $userdata->{account_id} });
 
 =head1 DESCRIPTION
 
