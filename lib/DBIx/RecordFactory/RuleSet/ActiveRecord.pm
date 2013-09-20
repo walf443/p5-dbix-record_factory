@@ -17,7 +17,7 @@ sub apply {
         my $columns = {};
         for my $col ( @{ $table->columns } ) {
             if ( $col eq "id" ) {
-                $columns->{$col} = sub { $_[0]->sequence($table_name) };
+                $columns->{$col} = sub { $_[0]->sequence($table_name . '.' . $col) };
             } elsif ( $col =~ /^(.+)_id$/ ) {
                 my $relation_table = $1;
                 if ( defined $args{$relation_table} && ref $args{$relation_table} eq "HASH" ) {
