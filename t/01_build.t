@@ -2,6 +2,8 @@ use strict;
 use warnings;
 use Test::More;
 use DBIx::RecordFactory;
+use DBI;
+use Teng;
 
 my $dbh = DBI->connect('dbi:SQLite:', {
         RaiseError => 1,
@@ -9,10 +11,16 @@ my $dbh = DBI->connect('dbi:SQLite:', {
         AutoCommit => 1,
 });
 
-my $factory = DBIx::RecordFactory->new(dbh => $dbh);
-isa_ok($factory, "DBIx::RecordFactory");
-
 $dbh->do(q{CREATE TABLE foo ( id int unsigned not null, name varchar(255) not null, cnt int unsigned not null, primary key (id) ); });
+
+my $teng = Teng::Schema::Loader->load(
+    dbh => $dbh,
+    namespace => "Test::Teng01",
+    suppress_row_objects => 1,
+);
+
+my $factory = DBIx::RecordFactory->new(teng => $teng);
+isa_ok($factory, "DBIx::RecordFactory");
 
 $factory->define("foo" => +{
     id => sub { $_[0]->sequence('foo_id') },

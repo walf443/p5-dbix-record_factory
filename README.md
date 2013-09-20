@@ -5,7 +5,7 @@ DBIx::RecordFactory - It's new $module
 # SYNOPSIS
 
     use DBIx::RecordFactory;
-    my $factory = DBIx::RecordFactory->new(dbh => $dbh);
+    my $factory = DBIx::RecordFactory->new(teng => $teng);
     $factory->define('user' => +{
         id => sub { shift->sequence('account_id') }
         account_id => sub {

@@ -2,22 +2,15 @@ package DBIx::RecordFactory;
 use 5.008005;
 use strict;
 use warnings;
-use Class::Accessor::Lite ( new => 1, ro => [qw( dbh )] );
+use Class::Accessor::Lite ( new => 1, ro => [qw( teng )] );
 use Teng::Schema::Loader;
 use POSIX qw();
 use DBI;
 
 our $VERSION = "0.01";
 
-sub teng {
-    my $self = shift;
-    $self->{teng} ||= sub {
-        Teng::Schema::Loader->load(
-            dbh => $self->dbh || '',
-            namespace => ( __PACKAGE__ . "::Teng" ),
-            suppress_row_objects => 1,
-        );
-    }->();
+sub dbh {
+    $_[0]->teng->dbh;
 }
 
 sub define {
@@ -107,7 +100,7 @@ DBIx::RecordFactory - It's new $module
 =head1 SYNOPSIS
 
     use DBIx::RecordFactory;
-    my $factory = DBIx::RecordFactory->new(dbh => $dbh);
+    my $factory = DBIx::RecordFactory->new(teng => $teng);
     $factory->define('user' => +{
         id => sub { shift->sequence('account_id') }
         account_id => sub {

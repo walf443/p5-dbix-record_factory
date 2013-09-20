@@ -11,7 +11,6 @@ sub apply {
     my $factory = $args{factory};
 
     my $schema = $factory->teng->schema;
-    use Data::Dumper;
     for my $table_name ( keys %{ $schema->{tables} } ) {
         my $table = $schema->get_table($table_name);
         my $columns = {};

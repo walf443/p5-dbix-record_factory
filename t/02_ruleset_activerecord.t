@@ -21,7 +21,13 @@ my $dbh = DBI->connect($mysqld->dsn(dbname => 'test'), {
 $dbh->do(q{CREATE TABLE foo ( id int unsigned not null, name varchar(255) not null, cnt int unsigned not null, primary key (id) ); });
 $dbh->do(q{CREATE TABLE bar ( id int unsigned not null, foo_id int unsigned not null, primary key (id) ); });
 
-my $factory = DBIx::RecordFactory->new(dbh => $dbh);
+my $teng = Teng::Schema::Loader->load(
+    dbh => $dbh,
+    namespace => "Test::Teng01",
+    suppress_row_objects => 1,
+);
+
+my $factory = DBIx::RecordFactory->new(teng => $teng);
 isa_ok($factory, "DBIx::RecordFactory");
 DBIx::RecordFactory::RuleSet::ActiveRecord->apply(factory => $factory);
 
