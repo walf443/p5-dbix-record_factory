@@ -14,8 +14,14 @@ sub apply {
     for my $table_name ( keys %{ $schema->{tables} } ) {
         my $table = $schema->get_table($table_name);
         my $columns = {};
+        my $primary_keys = $table->primary_keys;
+        my $primary_key;
+        if ( @$primary_keys == 1 ) {
+            $primary_key = $primary_keys->[0];
+        } else {
+        }
         for my $col ( @{ $table->columns } ) {
-            if ( $col eq "id" ) {
+            if ( $primary_key && $col eq $primary_key ) {
                 $columns->{$col} = sub { $_[0]->sequence($table_name . '.' . $col) };
             } elsif ( $col =~ /^(.+)_id$/ ) {
                 my $relation_table = $1;
