@@ -16,12 +16,23 @@ sub apply {
             if ( $col->is_nullable ne 'NO' ) {
                 # pass
             } else {
-                if ( $col->type_name =~ /VARCHAR/i ) {
-                    $columns->{$col->name} = sub { $_[0]->string(10, 20) };
-                } elsif ( $col->type_name =~ /INT/i ) {
-                    $columns->{$col->name} = sub { $_[0]->uint(1000) };
+                if ( $col->name eq "id" ) {
+                    $columns->{$col->name} = sub { $_[0]->sequence($table->name) };
+                } elsif ( $col->name =~ /^(.+)_id$/ ) {
+                    my $relation_table = $1;
+                    if ( defined $args{$table} && ref $args{$relation_table} eq "HASH" ) {
+                        $columns->{$col->name} = sub { my $relation = $_[0]->insert($relation_table, %{$args{$table}}); return $relation->{id} };
+                    } else {
+                        $columns->{$col->name} = sub { my $relation = $_[0]->insert($relation_table); return $relation->{id} };
+                    }
                 } else {
-                    $columns->{$col->name} = sub { 'dummy' };
+                    if ( $col->type_name =~ /VARCHAR/i ) {
+                        $columns->{$col->name} = sub { $_[0]->string(10, 20) };
+                    } elsif ( $col->type_name =~ /INT/i ) {
+                        $columns->{$col->name} = sub { $_[0]->uint(1000) };
+                    } else {
+                        $columns->{$col->name} = sub { 'dummy' };
+                    }
                 }
             }
         }

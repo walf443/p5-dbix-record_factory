@@ -24,9 +24,9 @@ subtest "rule foo" => sub {
     ok($rule->{cnt}, "name OK");
 };
 
-for my $count (1..2) {
+for my $count (1..1000) {
     subtest "iteration : $count" => sub {
-        my $row = $factory->build("foo");
+        my $row = $factory->insert("foo");
         is(ref $row, "HASH", "row should be HashRef");
         is($row->{id}, $count, "id OK");
         cmp_ok(length $row->{name}, '<', 255, "name OK");
