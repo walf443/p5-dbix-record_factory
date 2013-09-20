@@ -3,8 +3,16 @@ use warnings;
 use Test::More;
 use DBIx::RecordFactory;
 use DBIx::RecordFactory::RuleSet::ActiveRecord;
+use Test::mysqld;
 
-my $dbh = DBI->connect('dbi:SQLite:', {
+my $mysqld = Test::mysqld->new(
+    my_cnf => {
+        'skip-networking' => '',
+    }
+)
+    or plan skip_all => $Test::mysqld::errstr;
+
+my $dbh = DBI->connect($mysqld->dsn(dbname => 'test'), {
         RaiseError => 1,
         PrintError => 0,
         AutoCommit => 1,

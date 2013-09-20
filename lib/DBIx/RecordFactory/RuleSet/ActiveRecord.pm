@@ -2,41 +2,41 @@ package DBIx::RecordFactory::RuleSet::ActiveRecord;
 use 5.008_001;
 use strict;
 use warnings;
-use DBIx::Inspector;
+use DBI qw(:sql_types);
 
 our $VERSION = '0.01';
 
 sub apply {
     my ($class, %args) = @_;
     my $factory = $args{factory};
-    my $inspector = DBIx::Inspector->new(dbh => $factory->dbh);
-    for my $table ( $inspector->tables ) {
+
+    my $schema = $factory->teng->schema;
+    use Data::Dumper;
+    for my $table_name ( keys %{ $schema->{tables} } ) {
+        my $table = $schema->get_table($table_name);
         my $columns = {};
-        for my $col ( $table->columns ) {
-            if ( $col->is_nullable ne 'NO' ) {
-                # pass
-            } else {
-                if ( $col->name eq "id" ) {
-                    $columns->{$col->name} = sub { $_[0]->sequence($table->name) };
-                } elsif ( $col->name =~ /^(.+)_id$/ ) {
-                    my $relation_table = $1;
-                    if ( defined $args{$table} && ref $args{$relation_table} eq "HASH" ) {
-                        $columns->{$col->name} = sub { my $relation = $_[0]->insert($relation_table, %{$args{$table}}); return $relation->{id} };
-                    } else {
-                        $columns->{$col->name} = sub { my $relation = $_[0]->insert($relation_table); return $relation->{id} };
-                    }
+        for my $col ( @{ $table->columns } ) {
+            if ( $col eq "id" ) {
+                $columns->{$col} = sub { $_[0]->sequence($table_name) };
+            } elsif ( $col =~ /^(.+)_id$/ ) {
+                my $relation_table = $1;
+                if ( defined $args{$relation_table} && ref $args{$relation_table} eq "HASH" ) {
+                    $columns->{$col} = sub { my $relation = $_[0]->insert($relation_table, %{$args{$relation_table}}); return $relation->{id} };
                 } else {
-                    if ( $col->type_name =~ /VARCHAR/i ) {
-                        $columns->{$col->name} = sub { $_[0]->string(10, 20) };
-                    } elsif ( $col->type_name =~ /INT/i ) {
-                        $columns->{$col->name} = sub { $_[0]->uint(1000) };
-                    } else {
-                        $columns->{$col->name} = sub { 'dummy' };
-                    }
+                    $columns->{$col} = sub { my $relation = $_[0]->insert($relation_table); return $relation->{id} };
+                }
+            } else {
+                my $type = $table->get_sql_type($col);
+                if ( $type == SQL_INTEGER ) {
+                    $columns->{$col} = sub { $_[0]->uint(1000) };
+                } elsif ( $type == SQL_VARCHAR ) {
+                    $columns->{$col} = sub { $_[0]->string(10, 20) };
+                } else {
+                    $columns->{$col} = sub { 'dummy' };
                 }
             }
         }
-        $factory->define($table->name => $columns);
+        $factory->define($table_name => $columns);
     }
 }
 
