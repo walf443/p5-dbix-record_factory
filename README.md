@@ -7,15 +7,16 @@ DBIx::RecordFactory - It's new $module
     use DBIx::RecordFactory;
     my $factory = DBIx::RecordFactory->new(teng => $teng);
     $factory->define('user' => +{
-        id => sub { shift->sequence('account_id') }
+        id => sub { shift->sequence('account_id') },
+        name => sub { shift->choice(qw(foo bar baz)); },
         account_id => sub {
             my $account = shift->insert('account');
             $account->{id};
         }
     });
     $factory->define('account' => {
-        login_id => sub { shift->string(255) }
-        password => sub { shift->string(255) }
+        login_id => sub { shift->string(255) },
+        password => sub { shift->string(255) },
     });
 
     my $userdata = $factory->insert('user');
@@ -24,7 +25,7 @@ DBIx::RecordFactory - It's new $module
     #     'account_id' => 1,
     #   }
     my $teng = Teng->new(dbh => $dbh);
-    my $account = $teng->lookup(account => { id => $userdata->{account_id} });
+    my $account = $teng->single(account => { id => $userdata->{account_id} });
 
 # DESCRIPTION
 
