@@ -3,14 +3,21 @@ use 5.008005;
 use strict;
 use warnings;
 use Class::Accessor::Lite ( new => 1, ro => [qw( dbh )] );
-use Teng;
+use Teng::Schema::Loader;
 use POSIX qw();
+use DBI;
 
 our $VERSION = "0.01";
 
 sub teng {
     my $self = shift;
-    $self->{teng} ||= Teng->new(dbh => $self->dbh);
+    $self->{teng} ||= sub {
+        Teng::Schema::Loader->load(
+            dbh => $self->dbh || '',
+            namespace => ( __PACKAGE__ . "::Teng" ),
+            suppress_row_objects => 1,
+        );
+    }->();
 }
 
 sub define {
