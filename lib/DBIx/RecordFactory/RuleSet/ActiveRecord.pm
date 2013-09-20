@@ -32,7 +32,7 @@ sub apply {
                 } elsif ( $type == SQL_VARCHAR ) {
                     $columns->{$col} = sub { $_[0]->string(10, 20) };
                 } else {
-                    $columns->{$col} = sub { 'dummy' };
+                    # does not support. you should define manually,
                 }
             }
         }
@@ -61,7 +61,6 @@ This document describes DBIx::RecordFactory::RuleSet::ActiveRecord version 0.01.
 
 =head1 DESCRIPTION
 
-# TODO
 
 =head1 INTERFACE
 
