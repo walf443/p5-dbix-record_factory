@@ -14,13 +14,29 @@ sub dbh {
 }
 
 sub define {
-    my ($self, $name, $code, %args) = @_;
+    my ($self, $name, $code_hash, %args) = @_;
     $self->{__rule} ||= {};
-    $self->{__rule}->{ $name } = $code;
+    $self->{__rule}->{ $name } = $code_hash;
     $self->{__table_of} ||= {};
     $self->{__table_of}->{ $name } = ( $args{'table'} || $name );
 
-    return $code;
+    return $code_hash;
+}
+
+sub redefine {
+    my ($self, $name, $code_hash, %args) = @_;
+    my $rule = $self->rule($name)
+        or die "Can't find rule: $name";
+
+    my $new_rule = {
+        %$rule,
+        %$code_hash,
+    };
+    $self->{__table_of}->{ $name } = $new_rule;
+    $self->{__table_of} ||= {};
+    $self->{__table_of}->{ $name } = ( $args{'table'} || $name );
+
+    return $new_rule;
 }
 
 sub table_name {
@@ -37,7 +53,11 @@ sub insert {
     my ($self, $rule, %args) = @_;
     my $table = $self->table_name($rule);
     my $data = $self->build($rule, %args);
-    return $self->teng->insert($table => $data);
+    my $original_suppress_row_object = $self->teng->suppress_row_objects;
+    $self->teng->suppress_row_objects(1);
+    my $result = $self->teng->insert($table => $data);
+    $self->teng->suppress_row_objects($original_suppress_row_object);
+    return $result;
 }
 
 sub build {

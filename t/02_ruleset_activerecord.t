@@ -24,7 +24,6 @@ $dbh->do(q{CREATE TABLE bar ( id int unsigned not null, foo_id int unsigned not 
 my $teng = Teng::Schema::Loader->load(
     dbh => $dbh,
     namespace => "Test::Teng01",
-    suppress_row_objects => 1,
 );
 
 my $factory = DBIx::RecordFactory->new(teng => $teng);
